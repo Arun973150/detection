@@ -1,0 +1,42 @@
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+*.egg-info/
+*.log
+
+# Environments
+.env
+.env.*
+venv/
+.venv/
+.envrc
+
+# IDE / editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Data and outputs
+data/
+datasets/
+logs/
+outputs/
+runs/
+
+# Model weights / checkpoints
+*.pth
+*.pt
+*.ckpt
+*.h5
+*.onnx
+
+# Docker / compose artifacts
+*.pid
+
+# OS-specific
+.DS_Store
+Thumbs.db
+

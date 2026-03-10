@@ -1,0 +1,35 @@
+services:
+  api:
+    build: .
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./model_weights:/app/model_weights
+      - ./config:/app/config
+    environment:
+      - REALITY_DEFENDER_API_KEY=${REALITY_DEFENDER_API_KEY:-}
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+
+  gradio:
+    build: .
+    ports:
+      - "7860:7860"
+    volumes:
+      - ./model_weights:/app/model_weights
+      - ./config:/app/config
+    environment:
+      - REALITY_DEFENDER_API_KEY=${REALITY_DEFENDER_API_KEY:-}
+    command: ["python", "-m", "detection.gradio_ui"]
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]

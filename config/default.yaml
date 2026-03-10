@@ -1,0 +1,164 @@
+server:
+  host: "0.0.0.0"
+  port: 8000
+  max_image_size_mb: 20
+  allowed_formats: ["jpeg", "jpg", "png", "webp", "tiff", "bmp"]
+
+device:
+  prefer: "cuda"  # cuda, cpu, mps
+  gpu_memory_limit_gb: 8
+
+pipeline:
+  max_parallel_detectors: 4
+  timeout_per_layer_s: 30
+  timeout_total_s: 120
+
+models:
+  cache_dir: "./model_weights"
+  auto_download: true
+
+layers:
+  layer0_numerical:
+    enabled: true
+    weight: 0.10
+    ela:
+      quality_levels: [90, 75, 50]
+      threshold: 0.15
+    dct:
+      block_size: 8
+    srm:
+      num_filters: 30
+    prnu:
+      wavelet: "db4"
+      levels: 3
+    laplacian:
+      patch_size: 64
+      stride: 32
+    chromatic:
+      edge_threshold: 50
+    metadata:
+      check_exif: true
+      check_c2pa: true
+
+  layer0_5_purification:
+    enabled: true
+    weight: 0.0  # flags only
+    jpeg_qualities: [95, 85, 75, 65]
+    gaussian_sigmas: [1.0, 2.0]
+    median_kernel_sizes: [3, 5]
+    bit_depths: [6, 5]
+    diffpure:
+      enabled: false
+      timesteps: 50
+      model: "google/ddpm-cifar10-32"
+    random_crop:
+      scales: [0.8, 0.9, 0.95]
+    divergence_threshold: 0.20
+
+  layer1_aigen:
+    enabled: true
+    weight: 0.25
+    univfd:
+      enabled: true
+      model_path: "weights/univfd_linear_probe.pth"
+      clip_model: "ViT-L/14"
+      weight: 0.30
+    npr:
+      enabled: true
+      model_path: "weights/npr_resnet50.pth"
+      weight: 0.20
+    drct:
+      enabled: true
+      model_path: "weights/drct_checkpoint.pth"
+      weight: 0.25
+    fatformer:
+      enabled: true
+      model_path: "weights/fatformer_checkpoint.pth"
+      weight: 0.25
+
+  layer2_localization:
+    enabled: true
+    weight: 0.20
+    heatmap_resolution: [512, 512]
+    trufor:
+      enabled: true
+      model_path: "weights/trufor/"
+      weight: 0.30
+    pim:
+      enabled: true
+      model_path: "weights/pim/"
+      weight: 0.25
+    hifi_ifdl:
+      enabled: true
+      model_path: "weights/hifi_ifdl/"
+      weight: 0.25
+    forensim:
+      enabled: true
+      model_path: "weights/forensim/"
+      weight: 0.20
+
+  layer2_5_text:
+    enabled: true
+    weight: 0.10
+    ocr_engine: "easyocr"
+    languages: ["en"]
+    min_text_regions: 1
+    garble_confidence_threshold: 0.3
+    dictionary_check: true
+    font_stroke_variance_threshold: 0.4
+    perspective_angle_threshold: 15.0
+
+  layer2_6_semantic:
+    enabled: true
+    weight: 0.10
+    lighting:
+      num_regions: 4
+      consistency_threshold: 30  # degrees
+    shadows:
+      min_shadow_area: 500
+      direction_variance_threshold: 25  # degrees
+    reflections:
+      enabled: true
+    vanishing:
+      hough_threshold: 100
+      max_vanishing_points: 3
+      consistency_threshold: 50  # pixels
+
+  layer3_deepfake:
+    enabled: true
+    weight: 0.15
+    reality_defender:
+      enabled: true
+      api_key: "${REALITY_DEFENDER_API_KEY}"
+      endpoint: "https://api.realitydefender.com/v1/detect"
+      timeout_s: 10
+    local_fallback:
+      enabled: true
+      model: "efficientnet_b4"
+      model_path: "weights/deepfake_effnet_b4.pth"
+      face_detector: "mtcnn"
+      min_face_size: 40
+
+  layer4_watermark:
+    enabled: true
+    weight: 0.10
+    invisible_watermark:
+      enabled: true
+      watermark_length: 136
+      method: "dwtDctSvd"
+    c2pa:
+      enabled: true
+    gfunction:
+      enabled: true
+      num_frequency_bins: 256
+      significance_threshold: 0.6
+
+  layer5_fusion:
+    enabled: true
+    thresholds:
+      ai_generated: 0.75
+      manipulated: 0.65
+      deepfake: 0.70
+      suspicious: 0.40
+    adversarial_boost: 0.15
+    heatmap_smoothing_sigma: 2.0

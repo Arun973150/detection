@@ -1,0 +1,65 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.backends._legacy:_Backend"
+
+[project]
+name = "image-authenticity-detection"
+version = "0.1.0"
+description = "Multi-layered AI image authenticity detection system"
+requires-python = ">=3.10"
+dependencies = [
+    # Core
+    "numpy>=1.24",
+    "opencv-python-headless>=4.8",
+    "Pillow>=10.0",
+    "scipy>=1.11",
+    "PyWavelets>=1.4",
+    # ML
+    "torch>=2.1",
+    "torchvision>=0.16",
+    "timm>=0.9",
+    "open-clip-torch>=2.20",
+    "transformers>=4.35",
+    "diffusers>=0.25",
+    # API
+    "fastapi>=0.104",
+    "uvicorn[standard]>=0.24",
+    "python-multipart>=0.0.6",
+    "httpx>=0.25",
+    # Config
+    "pyyaml>=6.0",
+    "pydantic>=2.5",
+    "pydantic-settings>=2.1",
+    # OCR
+    "easyocr>=1.7",
+    # Watermark
+    "invisible-watermark>=0.2",
+    # Face detection
+    "facenet-pytorch>=2.5",
+    # UI
+    "gradio>=4.0",
+    # Infra
+    "tqdm>=4.66",
+    "huggingface-hub>=0.19",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.4",
+    "pytest-asyncio>=0.23",
+    "ruff>=0.1",
+]
+c2pa = [
+    "c2pa-python>=0.4",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
